@@ -1,58 +1,198 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Login Page</title>
+    <title>Advanced Task Manager</title>
+
     <style>
-        body {
+        * {
+            box-sizing: border-box;
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
         }
-        .login-container {
-            width: 300px;
-            margin: 100px auto;
-            padding: 30px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0px 0px 10px #aaa;
+
+        body {
+            margin: 0;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: 0.3s;
         }
-        .login-container h2 {
-            text-align: center;
-            margin-bottom: 20px;
+
+        .dark {
+            background: #121212;
         }
-        .login-container input[type="text"],
-        .login-container input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .login-container input[type="submit"] {
-            width: 100%;
-            padding: 10px;
-            background: #4CAF50;
+
+        .container {
+            width: 420px;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.15);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0px 10px 30px rgba(0,0,0,0.3);
             color: white;
+        }
+
+        .dark .container {
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .toggle-btn {
+            cursor: pointer;
+            background: white;
+            color: black;
+            border-radius: 20px;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .task-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
             border: none;
-            border-radius: 4px;
+            outline: none;
+        }
+
+        button {
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #00c6ff;
+            color: white;
             cursor: pointer;
         }
-        .login-container input[type="submit"]:hover {
-            background: #45a049;
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
         }
+
+        li {
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .dark li {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .actions span {
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
     </style>
+
 </head>
 <body>
-    <div class="login-container">
-        <h2>Login</h2>
-        <form action="login.jsp" method="post">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
 
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-
-            <input type="submit" value="Login">
-        </form>
+<div class="container">
+    
+    <div class="top-bar">
+        <h3>🚀 Tasks</h3>
+        <div class="toggle-btn" onclick="toggleDark()">🌙</div>
     </div>
+
+    <form class="task-form" onsubmit="addTask(event)">
+        <input type="text" id="taskInput" placeholder="Enter task..." required>
+        <button>Add</button>
+    </form>
+
+    <ul id="taskList"></ul>
+
+</div>
+
+<script>
+
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+    function saveTasks() {
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+
+    function renderTasks() {
+        const list = document.getElementById("taskList");
+        list.innerHTML = "";
+
+        tasks.forEach((task, index) => {
+            const li = document.createElement("li");
+
+            li.innerHTML = `
+                <span class="${task.done ? 'completed' : ''}" onclick="toggleDone(${index})">
+                    ${task.text}
+                </span>
+                <div class="actions">
+                    <span onclick="deleteTask(${index})">❌</span>
+                </div>
+            `;
+
+            list.appendChild(li);
+        });
+    }
+
+    function addTask(e) {
+        e.preventDefault();
+        const input = document.getElementById("taskInput");
+
+        tasks.push({ text: input.value, done: false });
+        input.value = "";
+
+        saveTasks();
+        renderTasks();
+    }
+
+    function deleteTask(index) {
+        tasks.splice(index, 1);
+        saveTasks();
+        renderTasks();
+    }
+
+    function toggleDone(index) {
+        tasks[index].done = !tasks[index].done;
+        saveTasks();
+        renderTasks();
+    }
+
+    function toggleDark() {
+        document.body.classList.toggle("dark");
+    }
+
+    renderTasks();
+
+</script>
+
 </body>
 </html>
